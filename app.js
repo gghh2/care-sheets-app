@@ -78,6 +78,8 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function loadGoogleDriveFiles() {
+
+    console.log('loadGoogleDriveFiles appelée, accessToken:', !!accessToken);
     if (!accessToken) return;
     
     // D'abord trouver l'ID du dossier "Fiches de Soin"
@@ -545,10 +547,83 @@ function setupSearch() {
 
 // Forcer le rafraîchissement des données
 function refreshFiles() {
-    // Vider le cache des fiches si il y en a un
+    console.log('Actualisation des fiches...');
+    
+    // Feedback visuel pour l'utilisateur
+    const filesList = document.getElementById('filesList');
+    if (filesList) {
+        filesList.innerHTML = '<div style="text-align: center; padding: 20px; color: #888;">Actualisation en cours...</div>';
+    }
+    
+    // Vider les anciens résultats
     localStorage.removeItem('cachedFiles');
     localStorage.removeItem('lastRefresh');
     
     // Recharger depuis Google Drive
+    if (accessToken) {
+        loadGoogleDriveFiles();
+    } else {
+        console.error('Pas de token d\'accès disponible');
+        if (filesList) {
+            filesList.innerHTML = '<div style="text-align: center; padding: 20px; color: #FF5722;">Erreur: non connecté à Google Drive</div>';
+        }
+    }
+}
+
+// Toggle menu hamburger
+function toggleMenu() {
+    const menu = document.getElementById('menuDropdown');
+    if (!menu) return;
+    
+    if (menu.style.display === 'none') {
+        // Mettre à jour le contenu selon l'état de connexion
+        updateMenuContent();
+        menu.style.display = 'block';
+    } else {
+        menu.style.display = 'none';
+    }
+}
+
+// Déconnexion
+function signOut() {
+    localStorage.removeItem('googleToken');
+    localStorage.removeItem('tokenExpiry');
+    location.reload();
+}
+
+// Forcer le rafraîchissement des données
+function refreshFiles() {
+    console.log('Actualisation des fiches...');
     loadGoogleDriveFiles();
+}
+
+// Fermer le menu si clic ailleurs
+document.addEventListener('click', function(e) {
+    const menu = document.getElementById('menuDropdown');
+    const menuButton = e.target.closest('button[onclick="toggleMenu()"]');
+    
+    if (menu && !menuButton && !menu.contains(e.target)) {
+        menu.style.display = 'none';
+    }
+});
+
+// Mettre à jour le contenu du menu selon l'état de connexion
+function updateMenuContent() {
+    const menu = document.getElementById('menuDropdown');
+    if (!menu) return;
+    
+    const isConnected = accessToken && localStorage.getItem('googleToken');
+    
+    if (isConnected) {
+        // Menu pour utilisateur connecté
+        menu.innerHTML = `
+            <div onclick="refreshFiles(); toggleMenu();" style="padding: 12px; cursor: pointer; color: #43A047; border-radius: 5px; margin-bottom: 4px;">🔄 Actualiser</div>
+            <div onclick="signOut(); toggleMenu();" style="padding: 12px; cursor: pointer; color: #FF5722; border-radius: 5px;">🚪 Se déconnecter</div>
+        `;
+    } else {
+        // Menu pour utilisateur non connecté
+        menu.innerHTML = `
+            <div onclick="signInWithGoogle(); toggleMenu();" style="padding: 12px; cursor: pointer; color: #1E88E5; border-radius: 5px;">🔑 Se connecter</div>
+        `;
+    }
 }
