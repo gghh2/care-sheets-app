@@ -30,6 +30,19 @@ function signInWithGoogle() {
                 
                 document.getElementById('loginBtn').textContent = 'Connecté !';
                 console.log('Connecté à Google Drive');
+                
+                // Cacher le bouton après 3 secondes
+                setTimeout(() => {
+                    const loginBtn = document.getElementById('loginBtn');
+                    if (loginBtn) {
+                        loginBtn.style.transition = 'opacity 0.5s ease';
+                        loginBtn.style.opacity = '0';
+                        setTimeout(() => {
+                            loginBtn.remove();
+                        }, 500);
+                    }
+                }, 3000);
+                
                 checkFirstTimeUser();
             }
         },
@@ -45,7 +58,7 @@ function initGoogleAuth() {
     if (savedToken && tokenExpiry && Date.now() < tokenExpiry) {
         accessToken = savedToken;
         checkFirstTimeUser();
-        return;
+        return; // Ne pas afficher le bouton si déjà connecté
     }
     
     google.accounts.id.initialize({
