@@ -157,10 +157,11 @@ function displayFiles(files) {
     });
 }
 
-// Vérifier si c'est un nouvel utilisateur
 function checkFirstTimeUser() {
     console.log('Vérification nouvel utilisateur...');
-    fetch('https://www.googleapis.com/drive/v3/files?q=name="Fiches de Soin"', {
+    
+    // Toujours rafraîchir la liste des dossiers
+    fetch('https://www.googleapis.com/drive/v3/files?q=name="Fiches de Soin"&fields=files(id,name,mimeType)', {
         headers: { 'Authorization': `Bearer ${accessToken}` }
     })
     .then(response => response.json())
@@ -480,6 +481,9 @@ function goBack() {
                         </svg>
                     </div>
                 </div>
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button onclick="refreshFiles()" style="background: #43A047; color: white; border: none; padding: 6px 12px; border-radius: 5px; font-size: 12px;">🔄 Actualiser</button>
+                </div>
                 <h1 style="color: #59B6FF; font-size: 42px; font-weight: 600; margin: 0;">Practo Note</h1>
             </div>
             <p>Recherchez une fiche de prise en soin</p>
@@ -516,4 +520,14 @@ function setupSearch() {
             }
         });
     });
+}
+
+// Forcer le rafraîchissement des données
+function refreshFiles() {
+    // Vider le cache des fiches si il y en a un
+    localStorage.removeItem('cachedFiles');
+    localStorage.removeItem('lastRefresh');
+    
+    // Recharger depuis Google Drive
+    loadGoogleDriveFiles();
 }
