@@ -1,0 +1,18 @@
+{
+  "name": "Fiches de Soin",
+  "short_name": "Fiches",
+  "description": "Application de gestion des fiches de prise en soin",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#212121",
+  "theme_color": "#1E88E5",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiByeD0iMjQiIGZpbGw9IiNGQjhDMDAiLz4KPGNpcmNsZSBjeD0iOTYiIGN5PSI5NiIgcj0iNDAiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xMDcgODVIODdWMTA3SDEwN1Y4NVoiIGZpbGw9IiNGQjhDMDAiLz4KPHN2ZyB4PSI3NiIgeT0iNzYiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSIjRkI4QzAwIj4KPHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI0ZCOEMwMCI+CjxwYXRoIGQ9Ik0xOSAxM2gtNnY2aC0ydi02SDV2LTJoNlY1aDJ2Nmg2djJ6Ii8+Cjwvc3ZnPgo8L3N2Zz4K",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
