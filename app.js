@@ -467,7 +467,7 @@ function goBack() {
                         </svg>
                     </div>
                 </div>
-                <h1 style="color: #1E88E5; font-size: 20px; font-weight: 600; margin: 0;">Fiches de Soin</h1>
+                <h1 style="color: #59B6FF; font-size: 42px; font-weight: 600; margin: 0;">Practo Note</h1>
             </div>
             <p>Recherchez une fiche de prise en soin</p>
         </div>
