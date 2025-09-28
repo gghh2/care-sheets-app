@@ -78,27 +78,39 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function loadGoogleDriveFiles() {
-
     console.log('loadGoogleDriveFiles appelée, accessToken:', !!accessToken);
+    
     if (!accessToken) return;
     
     // D'abord trouver l'ID du dossier "Fiches de Soin"
-    fetch('https://www.googleapis.com/drive/v3/files?q=name="Fiches de Soin" and mimeType="application/vnd.google-apps.folder"', {
+    fetch('https://www.googleapis.com/drive/v3/files?q=name="Fiches de Soin" and mimeType="application/vnd.google-apps.folder" and trashed=false', {
         headers: { 'Authorization': `Bearer ${accessToken}` }
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log('Réponse dossier:', response.status);
+        return response.json();
+    })
     .then(data => {
+        console.log('Données dossier:', data);
         if (data.files.length > 0) {
             const folderId = data.files[0].id;
-            // Ensuite chercher les fichiers dans ce dossier
-            return fetch(`https://www.googleapis.com/drive/v3/files?q=parents in '${folderId}'`, {
+            console.log('ID dossier:', folderId);
+            // AJOUT: exclure les fichiers supprimés
+            return fetch(`https://www.googleapis.com/drive/v3/files?q=parents in '${folderId}' and trashed=false`, {
                 headers: { 'Authorization': `Bearer ${accessToken}` }
             });
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log('Réponse fichiers:', response.status);
+        return response.json();
+    })
     .then(data => {
+        console.log('Fichiers récupérés (sans corbeille):', data.files?.length);
         displayFiles(data.files || []);
+    })
+    .catch(error => {
+        console.error('Erreur loadGoogleDriveFiles:', error);
     });
 }
 
@@ -365,7 +377,7 @@ function showFileContent(fileName, content) {
             </div>
             
             <!-- Contenu principal -->
-            <div class="content-area" style="height: 100vh; overflow-y: auto; padding: 20px;" id="contentArea">
+            <div class="content-area" style="height: 100vh; overflow-y: auto; padding: 20px 10px;" id="contentArea">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;" id="topButtons">
                     <button onclick="goBack()" style="background: #333; color: white; border: none; padding: 8px 12px; border-radius: 5px;">← Retour</button>
                     ${sections.length > 1 ? `
@@ -373,7 +385,7 @@ function showFileContent(fileName, content) {
                     ` : ''}
                 </div>
                 <h2 style="color: #1E88E5; margin-bottom: 20px;">${fileName}</h2>
-                <div style="background: #2C2C2C; padding: 20px; border-radius: 10px; white-space: pre-wrap; line-height: 1.6; font-size: 14px;">
+                <div style="background: #2C2C2C; padding: 15px 12px; border-radius: 10px; white-space: pre-wrap; line-height: 1.6; font-size: 14px;">
                     ${addSectionAnchors(cleanContent, sections)}
                 </div>
             </div>
@@ -455,11 +467,18 @@ function addSectionAnchors(content, sections) {
     return result;
 }
 
-// Naviguer vers une section
+// Naviguer vers une section avec offset pour la barre fixe
 function scrollToSection(sectionIndex) {
     const element = document.getElementById(`section-${sectionIndex}`);
     if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const contentArea = document.getElementById('contentArea');
+        const elementPosition = element.offsetTop;
+        const offsetPosition = elementPosition - 80; // 80px pour compenser la barre fixe
+        
+        contentArea.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+        });
     }
     
     // Mettre en surbrillance l'élément de navigation actif
