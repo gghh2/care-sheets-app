@@ -366,9 +366,26 @@ function checkFirstTimeUser() {
     // Afficher l'interface connectée
     const connectedInterface = document.getElementById('connectedInterface');
     const createButton = document.getElementById('createButton');
+    const hamburgerMenu = document.getElementById('hamburgerMenu');
     
-    if (connectedInterface) connectedInterface.style.display = 'block';
-    if (createButton) createButton.style.display = 'flex';
+    console.log('Elements trouvés:', {
+        connectedInterface: !!connectedInterface,
+        createButton: !!createButton, 
+        hamburgerMenu: !!hamburgerMenu
+    });
+    
+    if (connectedInterface) {
+        connectedInterface.style.display = 'block';
+        console.log('Interface connectée affichée');
+    }
+    if (createButton) {
+        createButton.style.display = 'flex';
+        console.log('Bouton créer affiché');
+    }
+    if (hamburgerMenu) {
+        hamburgerMenu.style.display = 'block';
+        console.log('Menu hamburger affiché');
+    }
     
     fetch('https://www.googleapis.com/drive/v3/files?q=name="Fiches de Soin"&fields=files(id,name,mimeType)', {
         headers: { 'Authorization': `Bearer ${accessToken}` }
