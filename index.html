@@ -16,17 +16,17 @@
 </head>
 <body>
     <div class="loading-screen" id="loadingScreen">
-    <div style="width: 80px; height: 80px; background: #FB8C00; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
-        <div style="width: 40px; height: 40px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="#FB8C00">
-                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-            </svg>
+        <div style="width: 80px; height: 80px; background: #FB8C00; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+            <div style="width: 40px; height: 40px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="#FB8C00">
+                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                </svg>
+            </div>
         </div>
+        <h1>Practo Note</h1>
+        <div class="spinner"></div>
+        <p>Chargement des fiches...</p>
     </div>
-    <h1>Practo Note</h1>
-    <div class="spinner"></div>
-    <p>Chargement des fiches...</p>
-</div>
     
     <div class="main-app" id="mainApp">
         <div class="header">
@@ -42,8 +42,8 @@
                     <h1 style="color: #59B6FF; font-size: 42px; font-weight: 600; margin: 0;">Practo Note</h1>
                 </div>
                 
-                <!-- Menu hamburger -->
-                <button onclick="toggleMenu()" style="background: none; border: none; color: #59B6FF; font-size: 24px; cursor: pointer; padding: 8px;">☰</button>
+                <!-- Menu hamburger (masqué si pas connecté) -->
+                <button id="hamburgerMenu" onclick="toggleMenu()" style="background: none; border: none; color: #59B6FF; font-size: 24px; cursor: pointer; padding: 8px; display: none;">☰</button>
             </div>
             
             <!-- Menu déroulant -->
@@ -65,22 +65,48 @@
             </div>
         </div>
         
-       <div class="search-container">
-            <input type="text" class="search-input" placeholder="Rechercher une fiche..." id="searchInput">
-            <button class="clear-search" id="clearSearch" onclick="clearSearch()">×</button>
-            <div class="autocomplete-list" id="autocompleteList"></div>
-        </div>
+        <!-- Interface connectée (masquée par défaut) -->
+        <div id="connectedInterface" style="display: none;">
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="Rechercher une fiche..." id="searchInput">
+                <button class="clear-search" id="clearSearch" onclick="clearSearch()">×</button>
+                <div class="autocomplete-list" id="autocompleteList"></div>
+            </div>
 
-        <!-- Liste des tags -->
-        <div style="margin: 15px 0;">
-            <div id="tagsList" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
-        </div>
-        
-        <div class="recent-files">
-            <h2>📁 Fiches récentes</h2>
-            <div id="filesList"></div>
+            <!-- Liste des tags -->
+            <div style="margin: 15px 0;">
+                <div id="tagsList" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
+            </div>
+            
+            <div class="recent-files">
+                <div id="filesList"></div>
+            </div>
         </div>
     </div>
+
+    <!-- Bouton flottant créer (masqué par défaut) -->
+    <button id="createButton" onclick="showCreateForm()" style="
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 60px;
+        height: 60px;
+        background: #FB8C00;
+        border: none;
+        border-radius: 50%;
+        box-shadow: 0 4px 12px rgba(251, 140, 0, 0.3);
+        cursor: pointer;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+    ">
+        <div style="width: 30px; height: 30px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="#FB8C00">
+                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+            </svg>
+        </div>
+    </button>
 
     <script src="app.js"></script>
 </body>

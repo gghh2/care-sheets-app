@@ -1,83 +1,110 @@
 let accessToken = null;
 
 
-// Dictionnaire de tags médicaux
 const MEDICAL_TAGS = {
     'urgence': [
-        'urgence', 'urgent', 'critique', 'alerte', 'samu', 'smur', 'réanimation',
-        'détresse', 'choc', 'arrêt', 'trauma majeur'
+        'urgence','urgent','critique','alerte','samu','smur','réanimation','réa',
+        'détresse','choc','arrêt cardiaque','arret cardiaque','RCP','ACR',
+        'défibrillation','massage cardiaque','intubation','ventilation',
+        'polytrauma','traumatisme majeur','crash','SAMU','SMUR'
     ],
     'pédiatrie': [
-        'enfant', 'pédiatrique', 'nourrisson', 'bébé', 'pediatr', 'adolescent',
-        'néonat', 'nouveau-né', 'infantile'
+        'enfant','pédiatrique','nourrisson','bébé','pediatr','adolescent','ado',
+        'néonat','nouveau-né','infantile','pré-maturé','vaccin','ROR','diphterie',
+        'varicelle','bronchiolite','laryngite','otite','angine','coqueluche'
     ],
     'cardiologie': [
-        'cardiaque', 'coeur', 'ecg', 'tension', 'hypertension', 'tachycardie',
-        'bradycardie', 'infarctus', 'angor', 'coronarien', 'insuffisance cardiaque',
-        'arythmie', 'fibrillation', 'stemi', 'nstemi'
+        'cardiaque','coeur','ecg','tension','hypertension','HTA','tachycardie',
+        'bradycardie','infarctus','angor','syndrome coronarien','SCA',
+        'insuffisance cardiaque','IC','arythmie','fibrillation','flutter',
+        'stemi','nstemi','angine de poitrine','trouble conduction',
+        'pacemaker','défibrillateur implantable','BAV','QT long'
     ],
     'neurologie': [
-        'neurologie', 'céphalée', 'migraine', 'avc', 'épilepsie', 'coma', 'ictus',
-        'neuropathie', 'parkinson', 'sclérose', 'ischémie cérébrale',
-        'hémorragie cérébrale', 'convulsion'
+        'neurologie','céphalée','migraine','avc','épilepsie','crise tonico-clonique',
+        'coma','ictus','neuropathie','sclérose','parkinson','ischémie cérébrale',
+        'hémorragie cérébrale','convulsion','status epilepticus','myasthénie',
+        'guillain barré','sclérose en plaques','ataxie','amnésie','neuropathie périphérique'
     ],
     'infectieux': [
-        'infection', 'fièvre', 'antibio', 'viral', 'bactérien', 'sepsis',
-        'septicémie', 'abcès', 'méningite', 'endocardite', 'tuberculose',
-        'grippe', 'covid', 'vih', 'hépatite'
+        'infection','fièvre','antibio','viral','bactérien','sepsis','septicémie',
+        'abcès','méningite','endocardite','tuberculose','grippe','covid','vih',
+        'hépatite','paludisme','dengue','chikungunya','leptospirose','zika',
+        'angine bactérienne','pneumonie infectieuse','impétigo','gale',
+        'zona','herpès','staphylocoque','streptocoque'
     ],
     'traumato': [
-        'fracture', 'trauma', 'blessure', 'plaie', 'chute', 'luxation',
-        'entorse', 'hématome', 'polytrauma', 'plaie pénétrante', 'brûlure'
+        'fracture','trauma','blessure','plaie','chute','luxation','entorse',
+        'hématome','polytrauma','plaie pénétrante','brûlure','crâne',
+        'traumatisme crânien','traumatisme abdominal','traumatisme thoracique',
+        'AVP','plaie ouverte','plaie artérielle','hémorragie externe',
+        'plâtre','immobilisation','polyfracture'
     ],
     'digestif': [
-        'digestif', 'gastro', 'nausée', 'vomissement', 'diarrhée', 'appendicite',
-        'occlusion', 'ulcère', 'hépatite', 'pancréatite', 'cirrhose',
-        'reflux', 'iléus', 'colique'
+        'digestif','gastro','nausée','vomissement','diarrhée','appendicite',
+        'occlusion','ulcère','hépatite','pancréatite','cirrhose','reflux',
+        'iléus','colique','hémorragie digestive','méléna','hématémèse',
+        'gastrite','rectocolite','crohn','ictère','calcul biliaire',
+        'cholécystite','angiocholite','ascite'
     ],
     'respiratoire': [
-        'respiration', 'asthme', 'pneumonie', 'dyspnée', 'toux', 'bpcO',
-        'hypoxie', 'hémoptysie', 'pleurésie', 'pneumothorax', 'bronchiolite',
-        'oedème pulmonaire'
+        'respiration','asthme','pneumonie','dyspnée','toux','BPCO','hypoxie',
+        'hémoptysie','pleurésie','pneumothorax','bronchiolite','oedème pulmonaire',
+        'intubation','ventilation','saturation','oxygène','O₂','VNI','intoxication CO',
+        'SDRA','silicose','tuberculose pulmonaire','emphysème'
     ],
     'protocole': [
-        'protocole', 'procédure', 'guideline', 'recommandation', 'checklist',
-        'arbre décisionnel', 'algorithme', 'fiche technique'
+        'protocole','procédure','guideline','recommandation','checklist',
+        'arbre décisionnel','algorithme','fiche technique','standard de soin',
+        'good practice','consensus','HAS','OMS','workflow'
     ],
     'néphrologie': [
-        'rein', 'dialyse', 'urémi', 'créatinine', 'hématurie', 'IRA',
-        'IRC', 'protéinurie', 'lithiase'
+        'rein','dialyse','urémi','créatinine','hématurie','IRA','IRC','protéinurie',
+        'lithiase','colique néphrétique','insuffisance rénale','hyperkaliémie',
+        'hypokaliémie','néphropathie','pyélonéphrite','cystite','clairance',
+        'DFG','transplantation rénale'
     ],
     'hématologie': [
-        'sang', 'anémie', 'thrombose', 'leucémie', 'lymphome', 'drépanocytose',
-        'coagulation', 'plaquettes', 'pancytopénie'
+        'sang','anémie','thrombose','leucémie','lymphome','drépanocytose',
+        'coagulation','plaquettes','pancytopénie','neutropénie','hémophilie',
+        'thrombopénie','hématocrite','Hb','hémoglobinopathie','hémorragie',
+        'anticoagulant','AVK','héparine'
     ],
     'dermatologie': [
-        'peau', 'rash', 'eczéma', 'psoriasis', 'urticaire', 'dermatite',
-        'lésion cutanée', 'brûlure', 'érythème'
+        'peau','rash','eczéma','psoriasis','urticaire','dermatite','lésion cutanée',
+        'brûlure','érythème','nodule cutané','ulcère cutané','acné','furoncle',
+        'verrue','impétigo','dermatophytie','teigne'
     ],
     'endocrino': [
-        'diabète', 'glycémie', 'thyroïde', 'hypothyroïdie', 'hyperthyroïdie',
-        'cortisol', 'insuline', 'hypoglycémie', 'hyperglycémie'
+        'diabète','glycémie','thyroïde','hypothyroïdie','hyperthyroïdie','cortisol',
+        'insuline','hypoglycémie','hyperglycémie','goitre','hormone','TSH',
+        'addison','cushing','obésité','métabolisme','parathyroïde','calcium',
+        'vitamine D','ménopause'
     ],
     'psychiatrie': [
-        'psy', 'dépression', 'suicide', 'hallucination', 'psychose', 'anxiété',
-        'bipolaire', 'schizophrénie', 'trouble panique', 'insomnie'
+        'psy','dépression','suicide','hallucination','psychose','anxiété',
+        'bipolaire','schizophrénie','trouble panique','insomnie','TOC',
+        'stress post-traumatique','TS','phobie','trouble alimentaire',
+        'anorexie','boulimie','TSH psychiatrique'
     ],
     'gynéco-obstétrique': [
-        'grossesse', 'femme enceinte', 'obstétrique', 'gynéco', 'césarienne',
-        'accouchement', 'hémorragie post-partum', 'contraception', 'fiv',
-        'endometriose'
+        'grossesse','femme enceinte','obstétrique','gynéco','césarienne',
+        'accouchement','hémorragie post-partum','contraception','fiv',
+        'endometriose','avortement','menstruation','cycle','dysménorrhée',
+        'ménopause','syndrome prémenstruel','sage-femme','échographie obstétricale',
+        'foetus','placenta'
     ],
     'oncologie': [
-        'cancer', 'tumeur', 'chimiothérapie', 'radiothérapie', 'carcinome',
-        'métastase', 'sarcome', 'immunothérapie'
+        'cancer','tumeur','chimiothérapie','radiothérapie','carcinome',
+        'métastase','sarcome','immunothérapie','oncologue','bilan d’extension',
+        'curiethérapie','prostate','sein','col de l’utérus','poumon','pancréas'
     ]
 };
 
 
 
-// Afficher bouton de connexion
+
+// Afficher bouton de connexion avec tutoriel
 function showLoginButton() {
     const header = document.querySelector('.header');
     header.innerHTML += `
@@ -90,25 +117,33 @@ function showLoginButton() {
             margin-top: 10px;
             cursor: pointer;
         ">Se connecter à Google Drive</button>
+        
+        <!-- Tutoriel sous le bouton -->
+        <div style="background: #2a2a2a; padding: 15px; border-radius: 8px; margin-top: 15px; font-size: 13px;">
+            <h4 style="color: #FB8C00; margin-bottom: 10px;">Pour commencer :</h4>
+            <ol style="color: #ccc; padding-left: 20px; line-height: 1.5;">
+                <li>Créez un dossier "Fiches de Soin" sur Google Drive</li>
+                <li>Ajoutez-y vos fiches médicales</li>
+                <li>Connectez-vous pour accéder à vos fiches</li>
+            </ol>
+        </div>
     `;
 }
 
-// Connexion Google
+// Connexion Google avec permissions d'écriture
 function signInWithGoogle() {
     google.accounts.oauth2.initTokenClient({
         client_id: CONFIG.CLIENT_ID,
-        scope: 'https://www.googleapis.com/auth/drive.readonly',
+        scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.readonly',
         callback: (response) => {
             if (response.access_token) {
                 accessToken = response.access_token;
-                // Sauvegarder le token
                 localStorage.setItem('googleToken', accessToken);
                 localStorage.setItem('tokenExpiry', Date.now() + (response.expires_in * 1000));
                 
                 document.getElementById('loginBtn').textContent = 'Connecté !';
                 console.log('Connecté à Google Drive');
                 
-                // Cacher le bouton après 3 secondes
                 setTimeout(() => {
                     const loginBtn = document.getElementById('loginBtn');
                     if (loginBtn) {
@@ -328,7 +363,13 @@ function filterByTag(tag) {
 function checkFirstTimeUser() {
     console.log('Vérification nouvel utilisateur...');
     
-    // Toujours rafraîchir la liste des dossiers
+    // Afficher l'interface connectée
+    const connectedInterface = document.getElementById('connectedInterface');
+    const createButton = document.getElementById('createButton');
+    
+    if (connectedInterface) connectedInterface.style.display = 'block';
+    if (createButton) createButton.style.display = 'flex';
+    
     fetch('https://www.googleapis.com/drive/v3/files?q=name="Fiches de Soin"&fields=files(id,name,mimeType)', {
         headers: { 'Authorization': `Bearer ${accessToken}` }
     })
@@ -683,22 +724,26 @@ function goBack() {
             </div>
         </div>
         
-        <div class="search-container">
-            <input type="text" class="search-input" placeholder="Rechercher une fiche..." id="searchInput">
-            <button class="clear-search" id="clearSearch" onclick="clearSearch()">×</button>
-            <div class="autocomplete-list" id="autocompleteList"></div>
-        </div>
-
-        <div style="margin: 15px 0;">
-            <div id="tagsList" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
-        </div>
-                        
-        <div class="recent-files">
-            <h2>📁 Fiches récentes</h2>
+                <div id="connectedInterface">
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="Rechercher une fiche..." id="searchInput">
+                <button class="clear-search" id="clearSearch" onclick="clearSearch()">×</button>
+            </div>
+            
+            <div style="margin: 15px 0;">
+                <div id="tagsList" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
+            </div>
+            
             <div id="filesList"></div>
         </div>
     `;
     
+
+    // Réafficher le bouton flottant
+    const createButton = document.getElementById('createButton');
+    if (createButton) createButton.style.display = 'flex';
+
+
     // Recharger les fiches et la recherche
     loadGoogleDriveFiles();
     setupSearch();
@@ -1097,4 +1142,151 @@ function toggleTagsExpansion() {
     }
     
     updateTagsList(filesIndex);
+}
+
+// Afficher le formulaire de création
+function showCreateForm() {
+    const mainApp = document.getElementById('mainApp');
+    mainApp.innerHTML = `
+        <div style="padding: 20px; max-width: 400px; margin: 0 auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="color: #1E88E5; margin: 0;">Créer une fiche</h2>
+                <button onclick="goBack()" style="background: #333; color: white; border: none; padding: 8px 12px; border-radius: 5px;">✕</button>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; color: #FAFAFA;">Titre de la fiche :</label>
+                <input type="text" id="ficheTitle" placeholder="Ex: Fiche - Appendicite de l'enfant" style="
+                    width: 100%;
+                    padding: 12px;
+                    border: none;
+                    border-radius: 8px;
+                    background: #333;
+                    color: #FAFAFA;
+                    font-size: 14px;
+                " maxlength="100">
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; color: #FAFAFA;">Contenu :</label>
+                <textarea id="ficheContent" placeholder="Rédigez le contenu de votre fiche..." style="
+                    width: 100%;
+                    height: 300px;
+                    padding: 12px;
+                    border: none;
+                    border-radius: 8px;
+                    background: #333;
+                    color: #FAFAFA;
+                    font-size: 14px;
+                    resize: vertical;
+                    font-family: inherit;
+                "></textarea>
+            </div>
+            
+            <div style="display: flex; gap: 10px;">
+                <button onclick="createGoogleDoc()" style="
+                    flex: 1;
+                    background: #43A047;
+                    color: white;
+                    border: none;
+                    padding: 12px;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    cursor: pointer;
+                ">Créer la fiche</button>
+                
+                <button onclick="goBack()" style="
+                    background: #666;
+                    color: white;
+                    border: none;
+                    padding: 12px 20px;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    cursor: pointer;
+                ">Annuler</button>
+            </div>
+            
+            <div id="createStatus" style="margin-top: 15px; text-align: center;"></div>
+        </div>
+    `;
+}
+
+// Créer le Google Doc
+async function createGoogleDoc() {
+    const title = document.getElementById('ficheTitle').value.trim();
+    const content = document.getElementById('ficheContent').value.trim();
+    const statusDiv = document.getElementById('createStatus');
+    
+    if (!title) {
+        statusDiv.innerHTML = '<span style="color: #FF5722;">Veuillez saisir un titre</span>';
+        return;
+    }
+    
+    if (!content) {
+        statusDiv.innerHTML = '<span style="color: #FF5722;">Veuillez saisir du contenu</span>';
+        return;
+    }
+    
+    statusDiv.innerHTML = '<span style="color: #1E88E5;">Création en cours...</span>';
+    
+    try {
+        // D'abord créer le document vide
+        const createResponse = await fetch('https://www.googleapis.com/drive/v3/files', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                name: title,
+                mimeType: 'application/vnd.google-apps.document',
+                parents: await getFichesSoinFolderId()
+            })
+        });
+        
+        if (!createResponse.ok) {
+            throw new Error('Erreur création document');
+        }
+        
+        const newDoc = await createResponse.json();
+        
+        // Ajouter le contenu au document
+        await fetch(`https://docs.googleapis.com/v1/documents/${newDoc.id}:batchUpdate`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                requests: [{
+                    insertText: {
+                        location: { index: 1 },
+                        text: content
+                    }
+                }]
+            })
+        });
+        
+        statusDiv.innerHTML = '<span style="color: #43A047;">Fiche créée avec succès !</span>';
+        
+        // Retour à la liste après 2 secondes
+        setTimeout(() => {
+            goBack();
+            refreshFiles(); // Actualiser pour voir la nouvelle fiche
+        }, 2000);
+        
+    } catch (error) {
+        console.error('Erreur création fiche:', error);
+        statusDiv.innerHTML = '<span style="color: #FF5722;">Erreur lors de la création</span>';
+    }
+}
+
+// Récupérer l'ID du dossier "Fiches de Soin"
+async function getFichesSoinFolderId() {
+    const response = await fetch('https://www.googleapis.com/drive/v3/files?q=name="Fiches de Soin" and mimeType="application/vnd.google-apps.folder"', {
+        headers: { 'Authorization': `Bearer ${accessToken}` }
+    });
+    
+    const data = await response.json();
+    return data.files.length > 0 ? [data.files[0].id] : [];
 }
