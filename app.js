@@ -1,5 +1,82 @@
 let accessToken = null;
 
+
+// Dictionnaire de tags médicaux
+const MEDICAL_TAGS = {
+    'urgence': [
+        'urgence', 'urgent', 'critique', 'alerte', 'samu', 'smur', 'réanimation',
+        'détresse', 'choc', 'arrêt', 'trauma majeur'
+    ],
+    'pédiatrie': [
+        'enfant', 'pédiatrique', 'nourrisson', 'bébé', 'pediatr', 'adolescent',
+        'néonat', 'nouveau-né', 'infantile'
+    ],
+    'cardiologie': [
+        'cardiaque', 'coeur', 'ecg', 'tension', 'hypertension', 'tachycardie',
+        'bradycardie', 'infarctus', 'angor', 'coronarien', 'insuffisance cardiaque',
+        'arythmie', 'fibrillation', 'stemi', 'nstemi'
+    ],
+    'neurologie': [
+        'neurologie', 'céphalée', 'migraine', 'avc', 'épilepsie', 'coma', 'ictus',
+        'neuropathie', 'parkinson', 'sclérose', 'ischémie cérébrale',
+        'hémorragie cérébrale', 'convulsion'
+    ],
+    'infectieux': [
+        'infection', 'fièvre', 'antibio', 'viral', 'bactérien', 'sepsis',
+        'septicémie', 'abcès', 'méningite', 'endocardite', 'tuberculose',
+        'grippe', 'covid', 'vih', 'hépatite'
+    ],
+    'traumato': [
+        'fracture', 'trauma', 'blessure', 'plaie', 'chute', 'luxation',
+        'entorse', 'hématome', 'polytrauma', 'plaie pénétrante', 'brûlure'
+    ],
+    'digestif': [
+        'digestif', 'gastro', 'nausée', 'vomissement', 'diarrhée', 'appendicite',
+        'occlusion', 'ulcère', 'hépatite', 'pancréatite', 'cirrhose',
+        'reflux', 'iléus', 'colique'
+    ],
+    'respiratoire': [
+        'respiration', 'asthme', 'pneumonie', 'dyspnée', 'toux', 'bpcO',
+        'hypoxie', 'hémoptysie', 'pleurésie', 'pneumothorax', 'bronchiolite',
+        'oedème pulmonaire'
+    ],
+    'protocole': [
+        'protocole', 'procédure', 'guideline', 'recommandation', 'checklist',
+        'arbre décisionnel', 'algorithme', 'fiche technique'
+    ],
+    'néphrologie': [
+        'rein', 'dialyse', 'urémi', 'créatinine', 'hématurie', 'IRA',
+        'IRC', 'protéinurie', 'lithiase'
+    ],
+    'hématologie': [
+        'sang', 'anémie', 'thrombose', 'leucémie', 'lymphome', 'drépanocytose',
+        'coagulation', 'plaquettes', 'pancytopénie'
+    ],
+    'dermatologie': [
+        'peau', 'rash', 'eczéma', 'psoriasis', 'urticaire', 'dermatite',
+        'lésion cutanée', 'brûlure', 'érythème'
+    ],
+    'endocrino': [
+        'diabète', 'glycémie', 'thyroïde', 'hypothyroïdie', 'hyperthyroïdie',
+        'cortisol', 'insuline', 'hypoglycémie', 'hyperglycémie'
+    ],
+    'psychiatrie': [
+        'psy', 'dépression', 'suicide', 'hallucination', 'psychose', 'anxiété',
+        'bipolaire', 'schizophrénie', 'trouble panique', 'insomnie'
+    ],
+    'gynéco-obstétrique': [
+        'grossesse', 'femme enceinte', 'obstétrique', 'gynéco', 'césarienne',
+        'accouchement', 'hémorragie post-partum', 'contraception', 'fiv',
+        'endometriose'
+    ],
+    'oncologie': [
+        'cancer', 'tumeur', 'chimiothérapie', 'radiothérapie', 'carcinome',
+        'métastase', 'sarcome', 'immunothérapie'
+    ]
+};
+
+
+
 // Afficher bouton de connexion
 function showLoginButton() {
     const header = document.querySelector('.header');
@@ -105,70 +182,147 @@ function loadGoogleDriveFiles() {
         console.log('Réponse fichiers:', response.status);
         return response.json();
     })
-    .then(data => {
+        .then(data => {
         console.log('Fichiers récupérés (sans corbeille):', data.files?.length);
-        displayFiles(data.files || []);
+        loadFilesWithCache(data.files || []); // Remplacer displayFiles par loadFilesWithCache
     })
     .catch(error => {
         console.error('Erreur loadGoogleDriveFiles:', error);
     });
 }
 
-// Afficher les fichiers
 function displayFiles(files) {
     const filesList = document.getElementById('filesList');
     filesList.innerHTML = '';
     
+    // Générer la liste des tags disponibles
+    updateTagsList(files);
+    
     files.forEach(file => {
-        // Meilleure détection du type de fichier
         let fileType = 'TXT';
-        const mimeType = file.mimeType;
-        
-        if (mimeType === 'application/vnd.google-apps.folder') {
+        if (file.mimeType === 'application/vnd.google-apps.folder') {
             fileType = 'DIR';
-        } else if (mimeType === 'application/vnd.google-apps.document') {
+        } else if (file.mimeType === 'application/vnd.google-apps.document') {
             fileType = 'GDoc';
-        } else if (mimeType === 'application/pdf') {
+        } else if (file.mimeType === 'application/pdf') {
             fileType = 'PDF';
-        } else if (mimeType === 'application/vnd.oasis.opendocument.text') {
+        } else if (file.mimeType === 'application/vnd.oasis.opendocument.text') {
             fileType = 'ODT';
-        } else if (mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-            fileType = 'DOCX';
-        } else if (mimeType === 'application/msword') {
-            fileType = 'DOC';
-        } else if (mimeType.includes('image')) {
+        } else if (file.mimeType.includes('image')) {
             fileType = 'IMG';
-        } else if (mimeType.includes('text')) {
-            fileType = 'TXT';
-        } else {
-            // Si pas de match, utiliser l'extension du nom de fichier
-            const extension = file.name.split('.').pop().toUpperCase();
-            if (extension && extension !== file.name.toUpperCase()) {
-                fileType = extension.substring(0, 4);
-            }
         }
         
-        // Truncate le titre si pas d'espace et trop long
         let displayName = file.name;
         if (!file.name.includes(' ') && file.name.length > 15) {
             displayName = file.name.substring(0, 12) + '...';
         }
         
+        // Tags sous le titre avec première lettre majuscule
+        const tagsHtml = file.tags && file.tags.length > 0 ? 
+            `<div style="display: flex; flex-wrap: wrap; gap: 3px; margin-top: 5px;">
+                ${file.tags.slice(0, 3).map(tag => 
+                    `<span style="background: #1E88E5; color: white; font-size: 8px; padding: 2px 4px; border-radius: 3px;">${tag.charAt(0).toUpperCase() + tag.slice(1)}</span>`
+                ).join('')}
+                ${file.tags.length > 3 ? `<span style="color: #888; font-size: 8px;">+${file.tags.length - 3}</span>` : ''}
+             </div>` : '';
+        
         const fileItem = document.createElement('div');
         fileItem.className = 'file-item';
-        // Ne pas permettre d'ouvrir les dossiers
+        
         if (fileType !== 'DIR') {
             fileItem.onclick = () => openFile(file.name, file.id);
         }
+        
         fileItem.innerHTML = `
-            <div class="file-name">${displayName}</div>
-            <div style="margin-top: auto;">
-                <div style="font-size: 24px; color: #535B75; text-align: center; margin: 10px 0; font-weight: bold;">${fileType}</div>
-                <div class="file-date">Google Drive</div>
+            <div>
+                <div class="file-name">${displayName}</div>
+                ${tagsHtml}
             </div>
+            <div class="file-date" style="font-size: 9px; margin-top: auto;">GDrive • ${fileType}</div>
         `;
         filesList.appendChild(fileItem);
     });
+}
+
+let tagsExpanded = false; // Variable globale pour l'état
+
+// Mettre à jour la liste des tags disponibles
+function updateTagsList(files) {
+    const tagsList = document.getElementById('tagsList');
+    if (!tagsList) return;
+    
+    // Collecter tous les tags uniques
+    const allTags = new Set();
+    files.forEach(file => {
+        if (file.tags) {
+            file.tags.forEach(tag => allTags.add(tag));
+        }
+    });
+    
+    const tagsArray = Array.from(allTags);
+    const maxVisible = 6; // Nombre de tags visibles par défaut (2 lignes de 3)
+    
+    if (tagsArray.length === 0) {
+        tagsList.innerHTML = '';
+        return;
+    }
+    
+    // Tags à afficher selon l'état
+    const visibleTags = tagsExpanded ? tagsArray : tagsArray.slice(0, maxVisible);
+    const hasMore = tagsArray.length > maxVisible;
+    
+    // Créer les boutons de tags
+    const tagsHtml = visibleTags.map(tag => 
+        `<button onclick="filterByTag('${tag}')" style="
+            background: #2C2C2C; 
+            color: #1E88E5; 
+            border: 1px solid #1E88E5; 
+            padding: 4px 8px; 
+            border-radius: 12px; 
+            font-size: 11px; 
+            cursor: pointer;
+        ">${tag.charAt(0).toUpperCase() + tag.slice(1)}</button>`
+    ).join('');
+    
+    // Bouton expand/collapse si nécessaire
+    const expandButton = hasMore ? 
+        `<button onclick="toggleTagsExpansion()" style="
+            background: #1E88E5; 
+            color: white; 
+            border: 1px solid #1E88E5; 
+            padding: 4px 8px; 
+            border-radius: 12px; 
+            font-size: 11px; 
+            cursor: pointer;
+        ">${tagsExpanded ? '▲' : '▼'} ${tagsExpanded ? 'Moins' : `+${tagsArray.length - maxVisible}`}</button>` : '';
+    
+    tagsList.innerHTML = tagsHtml + expandButton;
+}
+
+// Toggle expansion des tags
+function toggleTagsExpansion() {
+    tagsExpanded = !tagsExpanded;
+    // Récupérer la liste actuelle des fichiers affichés pour mettre à jour les tags
+    updateTagsList(filesIndex);
+}
+
+// Filtrer par tag
+function filterByTag(tag) {
+    const matchingFiles = filesIndex.filter(file => 
+        file.tags && file.tags.includes(tag)
+    );
+    displayFiles(matchingFiles);
+    
+    // Mettre le tag sélectionné dans la recherche
+    const searchInput = document.getElementById('searchInput');
+    const clearButton = document.getElementById('clearSearch');
+    
+    searchInput.value = tag;
+    
+    // Afficher le bouton clear
+    if (clearButton) {
+        clearButton.style.display = 'block';
+    }
 }
 
 function checkFirstTimeUser() {
@@ -527,15 +681,18 @@ function goBack() {
                 <div onclick="refreshFiles(); toggleMenu();" style="padding: 12px; cursor: pointer; color: #43A047; border-radius: 5px; margin-bottom: 5px; transition: background 0.2s;">🔄 Actualiser</div>
                 <div onclick="signOut(); toggleMenu();" style="padding: 12px; cursor: pointer; color: #FF5722; border-radius: 5px; transition: background 0.2s;">🚪 Se déconnecter</div>
             </div>
-            
-            <p>Recherchez une fiche de prise en soin</p>
         </div>
         
         <div class="search-container">
             <input type="text" class="search-input" placeholder="Rechercher une fiche..." id="searchInput">
+            <button class="clear-search" id="clearSearch" onclick="clearSearch()">×</button>
             <div class="autocomplete-list" id="autocompleteList"></div>
         </div>
-        
+
+        <div style="margin: 15px 0;">
+            <div id="tagsList" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
+        </div>
+                        
         <div class="recent-files">
             <h2>📁 Fiches récentes</h2>
             <div id="filesList"></div>
@@ -566,19 +723,17 @@ function setupSearch() {
 
 // Forcer le rafraîchissement des données
 function refreshFiles() {
-    console.log('Actualisation des fiches...');
+    console.log('🔄 Actualisation forcée des fiches...');
     
-    // Feedback visuel pour l'utilisateur
+    // Vider le cache pour forcer la mise à jour
+    localStorage.removeItem('filesIndex');
+    filesIndex = [];
+    
     const filesList = document.getElementById('filesList');
     if (filesList) {
         filesList.innerHTML = '<div style="text-align: center; padding: 20px; color: #888;">Actualisation en cours...</div>';
     }
     
-    // Vider les anciens résultats
-    localStorage.removeItem('cachedFiles');
-    localStorage.removeItem('lastRefresh');
-    
-    // Recharger depuis Google Drive
     if (accessToken) {
         loadGoogleDriveFiles();
     } else {
@@ -645,4 +800,301 @@ function updateMenuContent() {
             <div onclick="signInWithGoogle(); toggleMenu();" style="padding: 12px; cursor: pointer; color: #1E88E5; border-radius: 5px;">🔑 Se connecter</div>
         `;
     }
+}
+
+// Configuration du cache
+const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24h
+const CACHE_VERSION = '1.0';
+let filesIndex = []; // Index global des fichiers avec contenu
+
+// Charger ou créer l'index avec cache
+async function loadFilesWithCache(files) {
+    const cached = getCachedIndex();
+    
+    if (cached && isCacheValid(cached, files)) {
+        console.log('✅ Utilisation du cache existant');
+        filesIndex = cached.data;
+        displayFiles(filesIndex);
+        setupSearchWithContent();
+        return;
+    }
+    
+    console.log('🔄 Mise à jour de l\'index nécessaire');
+    await indexFiles(files);
+    saveCacheIndex(files);
+    displayFiles(filesIndex);
+    setupSearchWithContent();
+}
+
+// Vérifier si le cache est valide
+function isCacheValid(cached, currentFiles) {
+    // Vérifier la date d'expiration
+    if (Date.now() - cached.timestamp > CACHE_DURATION) {
+        console.log('Cache expiré');
+        return false;
+    }
+    
+    // Vérifier si les fichiers ont changé
+    const currentHash = generateFilesHash(currentFiles);
+    if (cached.filesHash !== currentHash) {
+        console.log('Fichiers modifiés détectés');
+        return false;
+    }
+    
+    return true;
+}
+
+// Générer un hash des métadonnées des fichiers (sans btoa)
+function generateFilesHash(files) {
+    const metadata = files.map(f => `${f.id}-${f.modifiedTime || f.name}`).join('|');
+    
+    // Hash simple sans btoa pour éviter les erreurs Unicode
+    let hash = 0;
+    for (let i = 0; i < metadata.length; i++) {
+        const char = metadata.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convertir en 32bit
+    }
+    
+    return Math.abs(hash).toString(36); // Base36 pour un hash court
+}
+
+// Récupérer le cache
+function getCachedIndex() {
+    try {
+        const cached = localStorage.getItem('filesIndex');
+        if (!cached) return null;
+        
+        const parsed = JSON.parse(cached);
+        if (parsed.version !== CACHE_VERSION) {
+            console.log('Version de cache obsolète');
+            return null;
+        }
+        
+        return parsed;
+    } catch (e) {
+        console.warn('Erreur lecture cache:', e);
+        return null;
+    }
+}
+
+// Sauvegarder dans le cache
+function saveCacheIndex(files) {
+    try {
+        const cacheData = {
+            version: CACHE_VERSION,
+            timestamp: Date.now(),
+            filesHash: generateFilesHash(files),
+            data: filesIndex.map(file => ({
+            id: file.id,
+            name: file.name,
+            mimeType: file.mimeType,
+            content: file.content?.substring(0, 5000) || '',
+            tags: file.tags || [], // Ajouter les tags au cache
+            searchable: file.searchable
+        }))
+        };
+        
+        const jsonString = JSON.stringify(cacheData);
+        
+        // Vérifier la taille avant de sauvegarder
+        if (jsonString.length > 5000000) { // 5MB limite
+            console.warn('Cache trop volumineux, indexation sans cache');
+            return;
+        }
+        
+        localStorage.setItem('filesIndex', jsonString);
+        console.log('Cache sauvé:', Math.round(jsonString.length/1024), 'KB');
+    } catch (e) {
+        console.warn('Erreur sauvegarde cache:', e.message);
+        // Nettoyer en cas d'erreur
+        localStorage.removeItem('filesIndex');
+    }
+}
+
+// Modifier indexFiles pour inclure les tags
+async function indexFiles(files) {
+    console.log('📑 Indexation de', files.length, 'fichiers...');
+    
+    const promises = files.map(async (file, index) => {
+        if (index % 3 === 0) {
+            const filesList = document.getElementById('filesList');
+            if (filesList) {
+                filesList.innerHTML = `<div style="text-align: center; padding: 20px; color: #888;">Indexation... ${index}/${files.length}</div>`;
+            }
+        }
+        
+        if (file.mimeType === 'application/vnd.google-apps.document') {
+            try {
+                const response = await fetch(`https://www.googleapis.com/drive/v3/files/${file.id}/export?mimeType=text/plain`, {
+                    headers: { 'Authorization': `Bearer ${accessToken}` }
+                });
+                const content = await response.text();
+                const cleanContent = removeAccents(content.toLowerCase());
+                
+                return {
+                    ...file,
+                    content: cleanContent,
+                    tags: extractTags(cleanContent), // Ajouter les tags
+                    searchable: true
+                };
+            } catch (error) {
+                console.warn('⚠️ Erreur indexation', file.name, error);
+                return { ...file, content: '', tags: [], searchable: false };
+            }
+        }
+        
+        return {
+            ...file,
+            content: cleanContent,
+            tags: extractTags(cleanContent), // Cette ligne est importante
+            searchable: true
+        };
+    });
+    
+    filesIndex = await Promise.all(promises);
+    console.log('✅ Indexation terminée:', filesIndex.filter(f => f.searchable).length, 'fichiers indexés');
+}
+
+// Recherche avancée dans nom + contenu + tags
+function setupSearchWithContent() {
+    const searchInput = document.getElementById('searchInput');
+    if (!searchInput) return;
+    
+    // Supprimer l'ancien listener s'il existe
+    searchInput.removeEventListener('input', originalSearchFunction);
+    
+    searchInput.addEventListener('input', function() {
+        const query = removeAccents(this.value.toLowerCase());
+        
+        if (query.length === 0) {
+            // Afficher tous les fichiers
+            displayFiles(filesIndex);
+            return;
+        }
+        
+        if (query.length < 2) {
+            // Recherche dans les noms seulement pour les requêtes courtes
+            const matchingFiles = filesIndex.filter(file => {
+                const fileName = removeAccents(file.name.toLowerCase());
+                return fileName.includes(query);
+            });
+            displayFiles(matchingFiles);
+            return;
+        }
+        
+        // Recherche complète dans nom + contenu + tags
+        const matchingFiles = filesIndex.filter(file => {
+            const fileName = removeAccents(file.name.toLowerCase());
+            const fileContent = file.content || '';
+            const fileTags = file.tags || [];
+            
+            return fileName.includes(query) || 
+                   fileContent.includes(query) || 
+                   fileTags.some(tag => tag.includes(query));
+        });
+        
+        console.log(`🔍 "${query}" trouvé dans ${matchingFiles.length} fichier(s)`);
+        displayFiles(matchingFiles);
+    });
+}
+
+// Sauvegarder la fonction de recherche originale
+const originalSearchFunction = function() {
+    const query = removeAccents(this.value.toLowerCase());
+    const allFiles = document.querySelectorAll('.file-item');
+    
+    allFiles.forEach(item => {
+        const fileName = removeAccents(item.querySelector('.file-name').textContent.toLowerCase());
+        if (fileName.includes(query)) {
+            item.style.display = 'block';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+};
+
+
+// Extraire les tags du contenu
+function extractTags(content) {
+    if (!content) return [];
+    
+    const contentLower = content.toLowerCase();
+    const foundTags = [];
+    
+    Object.entries(MEDICAL_TAGS).forEach(([tag, keywords]) => {
+        const hasKeyword = keywords.some(keyword => contentLower.includes(keyword));
+        if (hasKeyword) {
+            foundTags.push(tag);
+        }
+    });
+    
+    return foundTags;
+}
+
+// Fonction pour clear la recherche
+function clearSearch() {
+    document.getElementById('searchInput').value = '';
+    displayFiles(filesIndex);
+    document.getElementById('clearSearch').style.display = 'none';
+}
+
+// Modifier setupSearchWithContent pour gérer le bouton clear
+function setupSearchWithContent() {
+    const searchInput = document.getElementById('searchInput');
+    const clearButton = document.getElementById('clearSearch');
+    
+    if (!searchInput) return;
+    
+    searchInput.removeEventListener('input', originalSearchFunction);
+    
+    searchInput.addEventListener('input', function() {
+        const query = removeAccents(this.value.toLowerCase());
+        
+        // Afficher/cacher le bouton clear
+        if (clearButton) {
+            clearButton.style.display = query.length > 0 ? 'block' : 'none';
+        }
+        
+        if (query.length === 0) {
+            displayFiles(filesIndex);
+            return;
+        }
+        
+        if (query.length < 2) {
+            const matchingFiles = filesIndex.filter(file => {
+                const fileName = removeAccents(file.name.toLowerCase());
+                return fileName.includes(query);
+            });
+            displayFiles(matchingFiles);
+            return;
+        }
+        
+        const matchingFiles = filesIndex.filter(file => {
+            const fileName = removeAccents(file.name.toLowerCase());
+            const fileContent = file.content || '';
+            const fileTags = file.tags || [];
+            
+            return fileName.includes(query) || 
+                   fileContent.includes(query) || 
+                   fileTags.some(tag => tag.includes(query));
+        });
+        
+        console.log(`🔍 "${query}" trouvé dans ${matchingFiles.length} fichier(s)`);
+        displayFiles(matchingFiles);
+    });
+}
+
+// Toggle expansion des tags
+function toggleTagsExpansion() {
+    tagsExpanded = !tagsExpanded;
+    const tagsList = document.getElementById('tagsList');
+    
+    if (tagsExpanded) {
+        tagsList.classList.add('expanded');
+    } else {
+        tagsList.classList.remove('expanded');
+    }
+    
+    updateTagsList(filesIndex);
 }

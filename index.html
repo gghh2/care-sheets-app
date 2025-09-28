@@ -63,13 +63,17 @@
                 <div onclick="refreshFiles(); toggleMenu();" style="padding: 12px; cursor: pointer; color: #43A047; border-radius: 5px; margin-bottom: 5px; transition: background 0.2s;">🔄 Actualiser</div>
                 <div onclick="signOut(); toggleMenu();" style="padding: 12px; cursor: pointer; color: #FF5722; border-radius: 5px; transition: background 0.2s;">🚪 Se déconnecter</div>
             </div>
-            
-            <p>Recherchez une fiche de prise en soin</p>
         </div>
         
-        <div class="search-container">
+       <div class="search-container">
             <input type="text" class="search-input" placeholder="Rechercher une fiche..." id="searchInput">
+            <button class="clear-search" id="clearSearch" onclick="clearSearch()">×</button>
             <div class="autocomplete-list" id="autocompleteList"></div>
+        </div>
+
+        <!-- Liste des tags -->
+        <div style="margin: 15px 0;">
+            <div id="tagsList" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
         </div>
         
         <div class="recent-files">
